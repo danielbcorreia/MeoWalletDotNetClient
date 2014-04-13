@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
+using Newtonsoft.Json;
 using Owin;
 using Microsoft.Owin.Hosting;
 
@@ -74,10 +76,23 @@ namespace MeoWallet.ConsoleDemo
 
     public class CallbackController : ApiController
     {
-        public HttpResponseMessage Get(string type, Guid checkoutid)
+        public async Task<HttpResponseMessage> Get(string type, Guid checkoutid)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, 
-                string.Format("Done! Type={0}, CheckoutId={1}", type, checkoutid));
+            if (type == "confirm")
+            {
+                // double check to ensure that this request was not forged
+                var client = new WalletClient();
+                var checkout = await client.GetCheckout(checkoutid);
+
+                if (checkout.Payment.Status == TransactionStatus.Completed)
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, "The transaction was completed successfully!");
+                }
+                
+                return Request.CreateResponse(HttpStatusCode.OK, "The transaction was not completed. Current state is: " + JsonConvert.SerializeObject(checkout.Payment.Status));
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, string.Format("Type={0}, CheckoutId={1}", type, checkoutid));
         }
     }
 
