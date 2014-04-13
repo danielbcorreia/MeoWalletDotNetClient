@@ -61,14 +61,15 @@ namespace MeoWallet
                 var response = await client.PostAsJsonAsync("checkout", data, new JsonSerializerSettings
                 {
                     NullValueHandling = NullValueHandling.Ignore
-                });
+                })
+                .ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<Checkout>();
+                var result = await response.Content.ReadAsAsync<Checkout>().ConfigureAwait(false);
 
                 return result;
             }
@@ -79,14 +80,14 @@ namespace MeoWallet
             using (var client = _clientFactory.Create())
             {
                 // TODO bug in docs: "Content-Type: application/json"?? Change to Accept...
-                var response = await client.GetAsync("checkout/" + id);
+                var response = await client.GetAsync("checkout/" + id).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<Checkout>();
+                var result = await response.Content.ReadAsAsync<Checkout>().ConfigureAwait(false);
 
                 return result;
             }
@@ -96,14 +97,14 @@ namespace MeoWallet
         {
             using (var client = _clientFactory.Create())
             {
-                var response = await client.DeleteAsync("checkout/" + id);
+                var response = await client.DeleteAsync("checkout/" + id).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<Checkout>();
+                var result = await response.Content.ReadAsAsync<Checkout>().ConfigureAwait(false);
 
                 return result;
             }
@@ -125,14 +126,14 @@ namespace MeoWallet
                     { "end-date", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null },
                 };
 
-                var response = await client.GetAsync("operations?" + BuildQueryString(queryParameters));
+                var response = await client.GetAsync("operations?" + BuildQueryString(queryParameters)).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<OperationList>();
+                var result = await response.Content.ReadAsAsync<OperationList>().ConfigureAwait(false);
 
                 return result;
             }
@@ -142,14 +143,14 @@ namespace MeoWallet
         {
             using (var client = _clientFactory.Create())
             {
-                var response = await client.GetAsync("operations/" + id);
+                var response = await client.GetAsync("operations/" + id).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<Operation>();
+                var result = await response.Content.ReadAsAsync<Operation>().ConfigureAwait(false);
 
                 return result;
             }
@@ -165,14 +166,15 @@ namespace MeoWallet
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })
+                    .ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<Operation>();
+                var result = await response.Content.ReadAsAsync<Operation>().ConfigureAwait(false);
 
                 return result;
             }
@@ -199,14 +201,15 @@ namespace MeoWallet
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })
+                    .ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var result = await response.Content.ReadAsAsync<Operation>();
+                var result = await response.Content.ReadAsAsync<Operation>().ConfigureAwait(false);
 
                 return result;
             }
@@ -222,8 +225,8 @@ namespace MeoWallet
 
             using (var client = _clientFactory.Create())
             {
-                var response = await client.PostAsync("callback/verify", new StringContent(payload, Encoding.UTF8, "application/json"));
-                var result = await response.Content.ReadAsAsync<bool>();
+                var response = await client.PostAsync("callback/verify", new StringContent(payload, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+                var result = await response.Content.ReadAsAsync<bool>().ConfigureAwait(false);
 
                 // If the callback is not valid verify answers 400 Bad Request and a single field "false" on the body
                 if (response.StatusCode == HttpStatusCode.BadRequest && !result)
@@ -234,10 +237,10 @@ namespace MeoWallet
                 // ... it's a valid callback by responding with status 200 OK and a single field "true" on the body
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>());
+                    throw new MeoWalletApiException(await response.Content.ReadAsAsync<Error>().ConfigureAwait(false));
                 }
 
-                var callback = await response.Content.ReadAsAsync<Callback>();
+                var callback = await response.Content.ReadAsAsync<Callback>().ConfigureAwait(false);
 
                 return callback;
             }
