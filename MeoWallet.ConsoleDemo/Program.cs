@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using Owin;
+using Microsoft.Owin.Hosting;
 
 namespace MeoWallet.ConsoleDemo
 {
@@ -11,45 +12,88 @@ namespace MeoWallet.ConsoleDemo
     {
         static void Main(string[] args)
         {
-            var client = new WalletClient();
+            // setup the Web API that will listen for the user return request
+            const string baseAddress = "http://localhost:9001/";
 
-            try
+            using (WebApp.Start<Startup>(baseAddress))
             {
-                var response = client.StartCheckout(6.5, new[]
-                {
-                    new PaymentItem
-                    {
-                        Name = "Some-item",
-                        Description = "Some item",
-                        Quantity = 2,
-                        Amount = 2.5,
-                        Reference = 123
-                    },
+                // the actual client checkout call
+                var client = new WalletClient();
 
-                    new PaymentItem
-                    {
-                        Name = "Another-item",
-                        Description = "Another item",
-                        Quantity = 1,
-                        Amount = 4.0,
-                        Reference = 124
-                    }
-                },
-                requiredFields: new RequiredFields
+                try
                 {
-                    Name = false,
-                    Email = false,
-                    Phone = false,
-                    Shipping = false
-                })
-                .Result;
+                    var response = client.StartCheckout(
+                        // total amount
+                        6.5,
+                        // the items that the customer will pay for
+                        new[]
+                        {
+                            new PaymentItem
+                            {
+                                Name = "Some-item",
+                                Description = "Some item",
+                                Quantity = 2,
+                                Amount = 2.5,
+                                Reference = 123
+                            },
 
-                Process.Start(response.UrlRedirect);
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException;
+                            new PaymentItem
+                            {
+                                Name = "Another-item",
+                                Description = "Another item",
+                                Quantity = 1,
+                                Amount = 4.0,
+                                Reference = 124
+                            }
+                        },
+                        // the fields that the user will have to fill to complete the payment
+                        requiredFields: new RequiredFields
+                        {
+                            Name = false,
+                            Email = false,
+                            Phone = false,
+                            Shipping = false
+                        },
+                        // these can be defined in the App.config. see the README.md for more details.
+                        confirmCallback: baseAddress + "api/callback?type=confirm",
+                        cancelCallback: baseAddress + "api/callback?type=cancel"
+                    ).Result;
+
+                    Process.Start(response.UrlRedirect);
+                }
+                catch (AggregateException e)
+                {
+                    throw e.InnerException;
+                }
+
+                Console.WriteLine("Waiting for requests to the API. Press enter to exit.");
+                Console.ReadLine();
             }
         }
     }
+
+    public class CallbackController : ApiController
+    {
+        public HttpResponseMessage Get(string type, Guid checkoutid)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, 
+                string.Format("Done! Type={0}, CheckoutId={1}", type, checkoutid));
+        }
+    }
+
+    public class Startup
+    {
+        public void Configuration(IAppBuilder appBuilder)
+        {
+            var config = new HttpConfiguration();
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+
+            appBuilder.UseWebApi(config);
+        }
+    } 
 }

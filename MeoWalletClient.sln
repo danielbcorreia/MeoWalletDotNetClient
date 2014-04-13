@@ -14,6 +14,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeoWallet.Client", "MeoWall
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeoWallet.ConsoleDemo", "MeoWallet.ConsoleDemo\MeoWallet.ConsoleDemo.csproj", "{B1AC2D2C-2031-455C-B8FA-80BC8E991079}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DC4EE4F-EBA2-4A49-A498-48C339EE7D8F}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
